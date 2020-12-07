@@ -51,7 +51,11 @@ const index = ({ users }) => {
 
   return (
     <div className="list-table">
-      <Table columns={columns} dataSource={users.data} />
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={users.data}
+      />
       <UserModal
         visible={modalVisible}
         closeHandler={closeHandler}
