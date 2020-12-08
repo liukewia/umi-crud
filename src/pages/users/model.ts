@@ -5,6 +5,7 @@ import {
 } from 'umi';
 import {
   getRemoteList,
+  addRecord,
   editRecord,
   deleteRecord
 } from './service';
@@ -17,6 +18,7 @@ interface UserModelType {
   },
   effects: {
     getRemote: Effect,
+    add: Effect,
     edit: Effect,
     delete: Effect,
   },
@@ -35,30 +37,6 @@ const UserModel: UserModelType = {
   // reducers 同步
   reducers: {
     getList(state, { payload }) {
-      // state 上一次的数据
-      //   const data = [
-      //     {
-      //       key: '1',
-      //       name: 'John Brown',
-      //       age: 32,
-      //       address: 'New York No. 1 Lake Park',
-      //       tags: ['nice', 'developer'],
-      //     },
-      //     {
-      //       key: '2',
-      //       name: 'Jim Green',
-      //       age: 42,
-      //       address: 'London No. 1 Lake Park',
-      //       tags: ['loser'],
-      //     },
-      //     {
-      //       key: '3',
-      //       name: 'Joe Black',
-      //       age: 32,
-      //       address: 'Sidney No. 1 Lake Park',
-      //       tags: ['cool', 'teacher'],
-      //     },
-      //   ];
       console.log('reduces ->', payload);
       return payload;
     },
@@ -73,13 +51,26 @@ const UserModel: UserModelType = {
         payload: data,
       });
     },
-    
+
+    *add({payload: {values} }, { put, call }) {
+      yield call(addRecord, {values});
+      yield put({
+        type: 'getRemote',
+      });
+    },
+
     *edit({payload: { id, values} }, { put, call }) {
       yield call(editRecord, {id, values});
+      yield put({
+        type: 'getRemote',
+      });
     },
-    
+
     *delete({payload: { id } }, { put, call }) {
       yield call(deleteRecord, {id});
+      yield put({
+        type: 'getRemote',
+      });
     },
   },
 

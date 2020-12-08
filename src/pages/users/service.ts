@@ -1,15 +1,29 @@
 import { request } from 'umi';
+import { message } from 'antd';
 
 const getRemoteList = async params => {
   return request('https://public-api-v1.aspirantzhang.com/users/', {
     method: 'get',
   })
     .then(response => {
-      console.log(response);
+      message.success(`Successfully fetched.`);
       return response;
     })
     .catch(e => {
-      console.log(e);
+      message.error(`Fail to fetch list, ${e}`);
+    });
+};
+
+const addRecord = async ({values}) => {
+  return request(`https://public-api-v1.aspirantzhang.com/users`, {
+    method: 'post',
+    data: values,
+  })
+    .then(response => {
+      message.success(`Successfully added.`);
+    })
+    .catch(e => {
+      message.error(`Fail to add, ${e}`);
     });
 };
 
@@ -19,31 +33,29 @@ const editRecord = async ({id, values}) => {
     data: values,
   })
     .then(response => {
-      console.log('edit ok');
-      return response;
+      message.success(`Successfully edited.`);
     })
     .catch(e => {
-      console.log(e);
+      message.error(`Fail to edit, ${e}`);
     });
 };
 
 const deleteRecord = async ({id}) => {
   return request(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
     method: 'delete',
-    params: id,
   })
     .then(response => {
-      console.log('delete ok');
-      return response;
+      message.success(`Successfully deleted.`);
     })
     .catch(e => {
-      console.log(e);
+      message.error(`Fail to delete, ${e}`);
     });
 };
 
 
 export {
   getRemoteList,
+  addRecord,
   editRecord,
   deleteRecord,
 }
