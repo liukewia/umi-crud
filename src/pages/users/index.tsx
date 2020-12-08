@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
-import { Table, Space, Button, Popconfirm, message } from 'antd';
-import { connect } from 'umi';
+import React, { useState, FC } from 'react';
+import { Table,
+  Space,
+  Button,
+  Popconfirm,
+  message
+} from 'antd';
+import { connect,
+  Dispatch,
+  Loading,
+  UserState,
+} from 'umi';
 import UserModal from './components/UserModal';
+import { SingleUserType, FormValues } from './data';
 
-const index = ({ users, userListLoading, dispatch }) => {
+interface UserPageProps {
+  users: UserState,
+  userListLoading: boolean,
+  dispatch: Dispatch,
+}
+
+const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [record, setRecord] = useState(undefined);
+  const [record, setRecord] = useState<SingleUserType | undefined>(undefined);
 
-  const editHandler = record => {
+  const editHandler = (record: SingleUserType) => {
     setModalVisible(true);
     setRecord(record);
   };
@@ -16,7 +32,7 @@ const index = ({ users, userListLoading, dispatch }) => {
     setModalVisible(false);
   };
 
-  const onFinish = values => {
+  const onFinish = (values: FormValues) => {
     let id = 0;
     if (record) {
       id = record.id;
@@ -37,10 +53,7 @@ const index = ({ users, userListLoading, dispatch }) => {
     setModalVisible(false);
   };
 
-  const confirmDelete = (record) => {
-    setRecord(record);
-    const id = record.id;
-    console.log(id)
+  const confirmDelete = (id: number) => {
     dispatch({
       type: 'users/delete',
       payload: { id },
@@ -62,7 +75,7 @@ const index = ({ users, userListLoading, dispatch }) => {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      render: text => <a>{text}</a>,
+      render: (text: string) => <a>{text}</a>,
     },
     {
       title: 'Create Time',
@@ -72,7 +85,7 @@ const index = ({ users, userListLoading, dispatch }) => {
     {
       title: 'Action',
       key: 'action',
-      render: (text, record) => (
+      render: (text: string, record: SingleUserType) => (
         <Space size="middle">
           <a
             onClick={() => {editHandler(record)}}
@@ -81,7 +94,7 @@ const index = ({ users, userListLoading, dispatch }) => {
           </a>
           <Popconfirm
             title="Are you sure to delete this user?"
-            onConfirm={() => {confirmDelete(record)}}
+            onConfirm={() => {confirmDelete(record.id)}}
             okText="Yes"
             cancelText="No"
           >
@@ -114,11 +127,13 @@ const index = ({ users, userListLoading, dispatch }) => {
   );
 };
 
-const mapStateToProps = ({ users, loading }) => {
+const mapStateToProps = ({ users, loading }: {
+  users: UserState, loading: Loading
+}) => {
   return {
     users,
     userListLoading: loading.models.users,
   };
 };
 
-export default connect(mapStateToProps)(index);
+export default connect(mapStateToProps)(UserListPage);

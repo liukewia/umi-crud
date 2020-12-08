@@ -10,13 +10,22 @@ import {
   deleteRecord
 } from './service';
 import { message } from 'antd';
+import {SingleUserType} from './data';
 
+export interface UserState {
+  data: SingleUserType[],
+  meta: {
+    total: number,
+    per_page: number,
+    page: number,
+  }
+}
 
 interface UserModelType {
   namespace: 'users',
-  state: {},
+  state: UserState,
   reducers: {
-    getList: Reducer,
+    getList: Reducer<UserState>,
   },
   effects: {
     getRemote: Effect,
@@ -34,7 +43,14 @@ const UserModel: UserModelType = {
   namespace: 'users',
 
   // 仓库初始值
-  state: {},
+  state: {
+    data: [],
+    meta: {
+      total: 0,
+      per_page: 5,
+      page: 1,
+    }
+  },
 
   // reducers 同步
   reducers: {

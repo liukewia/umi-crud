@@ -1,7 +1,8 @@
 import request, { extend } from 'umi-request';
 import { message } from 'antd';
+import { FormValues } from './data';
 
-const errorHandler = function(error) {
+const errorHandler = function(error: any) {
   if (error.response) {
     if (error.response.status >= 400) {
       message.error(error.data.message ? error.data.message : error.data);
@@ -13,7 +14,7 @@ const errorHandler = function(error) {
 
 const extendRequest = extend({ errorHandler });
 
-const getRemoteList = async params => {
+const getRemoteList = async () => {
   return extendRequest('https://public-api-v1.aspirantzhang.com/users/', {
     method: 'get',
   })
@@ -25,7 +26,7 @@ const getRemoteList = async params => {
     });
 };
 
-const addRecord = async ({values}) => {
+const addRecord = async ({values}: {values: FormValues}) => {
   return extendRequest(`https://public-api-v1.aspirantzhang.com/users`, {
     method: 'post',
     data: values,
@@ -38,7 +39,7 @@ const addRecord = async ({values}) => {
     });
 };
 
-const editRecord = async ({id, values}) => {
+const editRecord = async ({id, values}: { id: number, values: FormValues}) => {
   return extendRequest(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
     method: 'put',
     data: values,
@@ -51,7 +52,7 @@ const editRecord = async ({id, values}) => {
     });
 };
 
-const deleteRecord = async ({id}) => {
+const deleteRecord = async ({id}: {id: number}) => {
   return request(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
     method: 'delete',
   })
