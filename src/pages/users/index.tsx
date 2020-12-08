@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Table, Space } from 'antd';
+import { Table, Space, Popconfirm, message } from 'antd';
 import { connect } from 'umi';
 import UserModal from './components/UserModal';
 
-const index = ({ users }) => {
+const index = ({ users, dispatch }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [record, setRecord] = useState(undefined);
 
@@ -15,6 +15,30 @@ const index = ({ users }) => {
   const closeHandler = () => {
     setModalVisible(false);
   };
+
+
+  const onFinish = values => {
+    console.log(values);
+    const id = record.id;
+    dispatch({
+      type: 'users/edit',
+      payload: {
+        id,
+        values
+      },
+    });
+  };
+
+  const confirm = (record) => {
+    setRecord(record);
+    const id = record.id;
+    console.log(id)
+    dispatch({
+      type: 'users/delete',
+      payload: { id },
+    });
+    message.success('Click on Yes');
+  }
 
   const columns = [
     {
@@ -43,7 +67,14 @@ const index = ({ users }) => {
           >
             Edit
           </a>
-          <a>Delete</a>
+          <Popconfirm
+            title="Are you sure to delete this user?"
+            onConfirm={() => {confirm(record)}}
+            okText="Yes"
+            cancelText="No"
+          >
+            <a>Delete</a>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -60,6 +91,7 @@ const index = ({ users }) => {
         visible={modalVisible}
         closeHandler={closeHandler}
         record={record}
+        onFinish={onFinish}
       ></UserModal>
     </div>
   );

@@ -2,12 +2,20 @@ import React, { useEffect } from 'react';
 import { Modal, Form, Input } from 'antd';
 
 const UserModal = props => {
-  const {visible, closeHandler, record} = props;
+  const {visible, closeHandler, record, onFinish} = props;
   const [form] = Form.useForm();
 
   useEffect(() => {
-    form.setFieldsValue(record)
+    form.setFieldsValue(record);
   }, [visible]);
+
+  const onOk = () => {
+    form.submit();
+  };
+
+  const onFinishFailed = errorInfo => {
+    console.log('Failed:', errorInfo);
+  };
 
   return (
     <>
@@ -15,12 +23,14 @@ const UserModal = props => {
         forceRender
         visible={visible}
         title={'Basic Modal'}
-        onOk={closeHandler}
+        onOk={onOk}
         onCancel={closeHandler}
       >
         <Form
           form={form}
           name="basic"
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
         >
           <Form.Item
             label="Name"

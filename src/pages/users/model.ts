@@ -1,5 +1,13 @@
-import { Reducer, Effect, Subscription } from 'umi';
-import { getRemoteList } from './service';
+import {
+  Reducer,
+  Effect,
+  Subscription
+} from 'umi';
+import {
+  getRemoteList,
+  editRecord,
+  deleteRecord
+} from './service';
 
 interface UserModelType {
   namespace: 'users',
@@ -9,6 +17,8 @@ interface UserModelType {
   },
   effects: {
     getRemote: Effect,
+    edit: Effect,
+    delete: Effect,
   },
   subscriptions: {
     setup: Subscription,
@@ -56,13 +66,20 @@ const UserModel: UserModelType = {
   // effects 异步
   effects: {
     *getRemote(action, { put, call }) {
-      // yield put()
       const data = yield call(getRemoteList);
       console.log('data->', data);
       yield put({
         type: 'getList',
         payload: data,
       });
+    },
+    
+    *edit({payload: { id, values} }, { put, call }) {
+      yield call(editRecord, {id, values});
+    },
+    
+    *delete({payload: { id } }, { put, call }) {
+      yield call(deleteRecord, {id});
     },
   },
 

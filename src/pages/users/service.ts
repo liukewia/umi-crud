@@ -1,6 +1,6 @@
 import { request } from 'umi';
 
-export const getRemoteList = async params => {
+const getRemoteList = async params => {
   return request('https://public-api-v1.aspirantzhang.com/users/', {
     method: 'get',
   })
@@ -12,6 +12,42 @@ export const getRemoteList = async params => {
       console.log(e);
     });
 };
+
+const editRecord = async ({id, values}) => {
+  return request(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
+    method: 'put',
+    data: values,
+  })
+    .then(response => {
+      console.log('edit ok');
+      return response;
+    })
+    .catch(e => {
+      console.log(e);
+    });
+};
+
+const deleteRecord = async ({id}) => {
+  return request(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
+    method: 'delete',
+    params: id,
+  })
+    .then(response => {
+      console.log('delete ok');
+      return response;
+    })
+    .catch(e => {
+      console.log(e);
+    });
+};
+
+
+export {
+  getRemoteList,
+  editRecord,
+  deleteRecord,
+}
+
 // const data = [
 //   {
 //     key: '1',
