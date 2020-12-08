@@ -3,7 +3,7 @@ import { Table, Space, Button, Popconfirm, message } from 'antd';
 import { connect } from 'umi';
 import UserModal from './components/UserModal';
 
-const index = ({ users, dispatch }) => {
+const index = ({ users, userListLoading, dispatch }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [record, setRecord] = useState(undefined);
 
@@ -102,6 +102,7 @@ const index = ({ users, dispatch }) => {
         rowKey="id"
         columns={columns}
         dataSource={users.data}
+        loading={userListLoading}
       />
       <UserModal
         visible={modalVisible}
@@ -113,9 +114,10 @@ const index = ({ users, dispatch }) => {
   );
 };
 
-const mapStateToProps = ({ users }) => {
+const mapStateToProps = ({ users, loading }) => {
   return {
     users,
+    userListLoading: loading.models.users,
   };
 };
 

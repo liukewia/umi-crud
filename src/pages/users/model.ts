@@ -9,6 +9,8 @@ import {
   editRecord,
   deleteRecord
 } from './service';
+import { message } from 'antd';
+
 
 interface UserModelType {
   namespace: 'users',
@@ -38,6 +40,7 @@ const UserModel: UserModelType = {
   reducers: {
     getList(state, { payload }) {
       console.log('reduces ->', payload);
+      // message.success('Successfully fetched.');
       return payload;
     },
   },
@@ -46,31 +49,50 @@ const UserModel: UserModelType = {
     *getRemote(action, { put, call }) {
       const data = yield call(getRemoteList);
       console.log('data->', data);
-      yield put({
-        type: 'getList',
-        payload: data,
-      });
+      if (data) {
+        yield put({
+          type: 'getList',
+          payload: data,
+        });
+      } else {
+        message.error('Fail to fetch.');
+      }
     },
 
     *add({payload: {values} }, { put, call }) {
-      yield call(addRecord, {values});
-      yield put({
-        type: 'getRemote',
-      });
+      const data = yield call(addRecord, {values});
+      if (data) {
+        message.success('Successfully added.');
+        yield put({
+          type: 'getRemote',
+        });
+      } else {
+        message.error('Fail to add.');
+      }
     },
 
     *edit({payload: { id, values} }, { put, call }) {
-      yield call(editRecord, {id, values});
-      yield put({
-        type: 'getRemote',
-      });
+      const data = yield call(editRecord, {id, values});
+      if (data) {
+        message.success('Successfully edited.');
+        yield put({
+          type: 'getRemote',
+        });
+      } else {
+        message.error('Fail to edit.');
+      }
     },
 
     *delete({payload: { id } }, { put, call }) {
-      yield call(deleteRecord, {id});
-      yield put({
-        type: 'getRemote',
-      });
+      const data = yield call(deleteRecord, {id});
+      if (data) {
+        message.success('Successfully deleted.');
+        yield put({
+          type: 'getRemote',
+        });
+      } else {
+        message.error('Fail to delete.');
+      }
     },
   },
 

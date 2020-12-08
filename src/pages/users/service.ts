@@ -1,42 +1,53 @@
-import { request } from 'umi';
+import request, { extend } from 'umi-request';
 import { message } from 'antd';
 
+const errorHandler = function(error) {
+  if (error.response) {
+    if (error.response.status >= 400) {
+      message.error(error.data.message ? error.data.message : error.data);
+    }
+  } else {
+    message.error(`Network error.`);
+  }
+};
+
+const extendRequest = extend({ errorHandler });
+
 const getRemoteList = async params => {
-  return request('https://public-api-v1.aspirantzhang.com/users/', {
+  return extendRequest('https://public-api-v1.aspirantzhang.com/users/', {
     method: 'get',
   })
     .then(response => {
-      message.success(`Successfully fetched.`);
       return response;
     })
     .catch(e => {
-      message.error(`Fail to fetch list, ${e}`);
+      return false;
     });
 };
 
 const addRecord = async ({values}) => {
-  return request(`https://public-api-v1.aspirantzhang.com/users`, {
+  return extendRequest(`https://public-api-v1.aspirantzhang.com/users`, {
     method: 'post',
     data: values,
   })
     .then(response => {
-      message.success(`Successfully added.`);
+      return true;
     })
     .catch(e => {
-      message.error(`Fail to add, ${e}`);
+      return false;
     });
 };
 
 const editRecord = async ({id, values}) => {
-  return request(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
+  return extendRequest(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
     method: 'put',
     data: values,
   })
     .then(response => {
-      message.success(`Successfully edited.`);
+      return true;
     })
     .catch(e => {
-      message.error(`Fail to edit, ${e}`);
+      return false;
     });
 };
 
@@ -45,10 +56,10 @@ const deleteRecord = async ({id}) => {
     method: 'delete',
   })
     .then(response => {
-      message.success(`Successfully deleted.`);
+      return true;
     })
     .catch(e => {
-      message.error(`Fail to delete, ${e}`);
+      return false;
     });
 };
 
