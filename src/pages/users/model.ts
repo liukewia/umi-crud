@@ -122,11 +122,12 @@ const UserModel: UserModelType = {
     setup({ dispatch, history }) {
       return history.listen(({ pathname }) => {
         if (pathname === '/users') {
-          const page = 1;
-          const per_page = 20;
           dispatch({
             type: 'getRemote',
-            payload: { page, per_page },
+            payload: {
+              page: 1,
+              per_page: 5,
+            },
           });
         }
       });

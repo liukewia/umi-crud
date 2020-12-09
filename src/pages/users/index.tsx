@@ -1,5 +1,5 @@
 import React, { useState, useRef, FC } from 'react';
-import { Table, Space, Button, Popconfirm } from 'antd';
+import { Table, Space, Button, Popconfirm, Pagination } from 'antd';
 import ProTable, { ProColumns, TableDropdown, ActionType } from '@ant-design/pro-table';
 import { connect, Dispatch, Loading, UserState } from 'umi';
 import UserModal from './components/UserModal';
@@ -66,12 +66,26 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
     ref.current.reload();
   }
 
-  const requestHandler = async ({pageSize, current}) => {
-    return {
-      data: users.data,
-      success: true,
-      total: users.meta.total,
-    };
+  const paginationHandler = async (page, pageSize) => {
+    console.log(page, pageSize);
+    dispatch({
+      type: 'users/getRemote',
+      payload: {
+        page,
+        per_page: pageSize,
+      },
+    });
+  };
+
+  const pageSizeHandler = async (current, size) => {
+    console.log(current, size);
+    dispatch({
+      type: 'users/getRemote',
+      payload: {
+        page: current,
+        per_page: size,
+      },
+    });
   };
 
   const columns = [
@@ -128,9 +142,21 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
         columns={columns}
         dataSource={users.data}
         loading={userListLoading}
-        request={requestHandler}
         search={false}
         actionRef={ref}
+        pagination={false}
+      />
+      <Pagination
+        className="list-page"
+        total={users.meta.total}
+        showSizeChanger
+        showQuickJumper
+        showTotal={total => `Total ${total} items`}
+        onChange={paginationHandler}
+        onShowSizeChange={pageSizeHandler}
+        current={users.meta.page}
+        pageSize={users.meta.per_page}
+        pageSizeOptions={[`5`, `10`, `15`, `20`]}
       />
       <UserModal
         visible={modalVisible}
