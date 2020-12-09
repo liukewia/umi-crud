@@ -1,9 +1,14 @@
 import React, { useState, useRef, FC } from 'react';
-import { Table, Space, Button, Popconfirm, Pagination } from 'antd';
-import ProTable, { ProColumns, TableDropdown, ActionType } from '@ant-design/pro-table';
+import { Table, Space, Button, Popconfirm, Pagination, message } from 'antd';
+import ProTable, {
+  ProColumns,
+  TableDropdown,
+  ActionType,
+} from '@ant-design/pro-table';
 import { connect, Dispatch, Loading, UserState } from 'umi';
 import UserModal from './components/UserModal';
 import { SingleUserType, FormValues } from './data';
+import { addRecord, editRecord } from './service';
 
 interface UserPageProps {
   users: UserState;
@@ -11,16 +16,21 @@ interface UserPageProps {
   dispatch: Dispatch;
 }
 
-interface TableActionType {
+interface ActionType {
   reload: () => void;
   fetchMore: () => void;
   reset: () => void;
 }
 
-const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) => {
+const UserListPage: FC<UserPageProps> = ({
+  users,
+  userListLoading,
+  dispatch,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [record, setRecord] = useState<SingleUserType | undefined>(undefined);
-  const ref = useRef<TableActionType>();
+  const [confirmLoading, setConfirmLoading] = React.useState(false);
+  const ref = useRef<ActionType>();
 
   const editHandler = (record: SingleUserType) => {
     setModalVisible(true);
@@ -31,23 +41,33 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
     setModalVisible(false);
   };
 
-  const onFinish = (values: FormValues) => {
+  const onFinish = async (values: FormValues) => {
+    setConfirmLoading(true);
     let id = 0;
     if (record) {
       id = record.id;
     }
+
+    let serviceFun;
     if (id) {
-      dispatch({
-        type: 'users/edit',
-        payload: { id, values },
-      });
+      serviceFun = editRecord;
     } else {
-      dispatch({
-        type: 'users/add',
-        payload: { values },
-      });
+      serviceFun = addRecord;
     }
-    setModalVisible(false);
+    const result = await serviceFun({ id, values });
+    setConfirmLoading(false);
+    if (result) {
+      setModalVisible(false);
+    } else {
+      // message.warning(`${id === 0 ? 'Add' : 'Edit'} failed.`);
+    }
+    dispatch({
+      type: 'users/getRemote',
+      payload: {
+        page: users.meta.page,
+        per_page: users.meta.per_page,
+      },
+    });
   };
 
   const confirmDelete = (id: number) => {
@@ -55,16 +75,16 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
       type: 'users/delete',
       payload: { id },
     });
-  }
+  };
 
   const addHandler = () => {
     setModalVisible(true);
     setRecord(undefined);
-  }
+  };
 
   const reloadHandler = () => {
     ref.current.reload();
-  }
+  };
 
   const paginationHandler = async (page, pageSize) => {
     console.log(page, pageSize);
@@ -111,13 +131,17 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
       render: (text: string, record: SingleUserType) => (
         <Space size="middle">
           <a
-            onClick={() => {editHandler(record)}}
+            onClick={() => {
+              editHandler(record);
+            }}
           >
             Edit
           </a>
           <Popconfirm
             title="Are you sure to delete this user?"
-            onConfirm={() => {confirmDelete(record.id)}}
+            onConfirm={() => {
+              confirmDelete(record.id);
+            }}
             okText="Yes"
             cancelText="No"
           >
@@ -130,13 +154,12 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
 
   return (
     <div className="list-table">
-      <Button
-        type="primary"
-        onClick={addHandler}
-      >Add</Button>
-      <Button
-        onClick={reloadHandler}
-      >Reload</Button>
+      <Space size="large">
+        <Button type="primary" onClick={addHandler}>
+          Add
+        </Button>
+        <Button onClick={reloadHandler}>Reload</Button>
+      </Space>
       <ProTable
         rowKey="id"
         columns={columns}
@@ -163,13 +186,18 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
         closeHandler={closeHandler}
         record={record}
         onFinish={onFinish}
+        confirmLoading={confirmLoading}
       ></UserModal>
     </div>
   );
 };
 
-const mapStateToProps = ({ users, loading }: {
-  users: UserState, loading: Loading
+const mapStateToProps = ({
+  users,
+  loading,
+}: {
+  users: UserState;
+  loading: Loading;
 }) => {
   return {
     users,

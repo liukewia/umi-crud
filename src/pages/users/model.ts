@@ -1,14 +1,13 @@
 import { Reducer, Effect, Subscription } from 'umi';
 import { getRemoteList, addRecord, editRecord, deleteRecord } from './service';
-import { message } from 'antd';
-import {SingleUserType} from './data';
+import { SingleUserType } from './data';
 
 export interface UserState {
   data: SingleUserType[];
   meta: {
-    total: number,
-    per_page: number,
-    page: number,
+    total: number;
+    per_page: number;
+    page: number;
   };
 }
 
@@ -16,16 +15,16 @@ interface UserModelType {
   namespace: 'users';
   state: UserState;
   reducers: {
-    getList: Reducer<UserState>,
+    getList: Reducer<UserState>;
   };
   effects: {
-    getRemote: Effect,
-    add: Effect,
-    edit: Effect,
-    delete: Effect,
+    getRemote: Effect;
+    add: Effect;
+    edit: Effect;
+    delete: Effect;
   };
   subscriptions: {
-    setup: Subscription,
+    setup: Subscription;
   };
 }
 
@@ -40,7 +39,7 @@ const UserModel: UserModelType = {
       total: 0,
       per_page: 5,
       page: 1,
-    }
+    },
   },
 
   // reducers 同步
@@ -52,7 +51,7 @@ const UserModel: UserModelType = {
   },
   // effects 异步
   effects: {
-    *getRemote({ payload: { page, per_page }}, { put, call }) {
+    *getRemote({ payload: { page, per_page } }, { put, call }) {
       const data = yield call(getRemoteList, { page, per_page });
       // console.log('data->', data);
       if (data) {
@@ -60,60 +59,43 @@ const UserModel: UserModelType = {
           type: 'getList',
           payload: data,
         });
-      } else {
-        // message.error('Fail to fetch.');
       }
     },
 
-    *add({ payload: {values} }, { put, call, select }) {
-      const data = yield call(addRecord, {values});
-      if (data) {
-        message.success('Successfully added.');
-        const { page, per_page } = yield select(state => state.users.meta);
-        yield put({
-          type: 'getRemote',
-          payload: {
-            page,
-            per_page,
-          },
-        });
-      } else {
-        // message.error('Fail to add.');
-      }
+    *add({ payload: { values } }, { put, call, select }) {
+      yield call(addRecord, { values });
+      const { page, per_page } = yield select(state => state.users.meta);
+      yield put({
+        type: 'getRemote',
+        payload: {
+          page,
+          per_page,
+        },
+      });
     },
 
-    *edit({payload: { id, values} }, { put, call, select }) {
-      const data = yield call(editRecord, {id, values});
-      if (data) {
-        message.success('Successfully edited.');
-        const { page, per_page } = yield select(state => state.users.meta);
-        yield put({
-          type: 'getRemote',
-          payload: {
-            page,
-            per_page,
-          },
-        });
-      } else {
-        // message.error('Fail to edit.');
-      }
+    *edit({ payload: { id, values } }, { put, call, select }) {
+      yield call(editRecord, { id, values });
+      const { page, per_page } = yield select(state => state.users.meta);
+      yield put({
+        type: 'getRemote',
+        payload: {
+          page,
+          per_page,
+        },
+      });
     },
 
-    *delete({payload: { id } }, { put, call, select }) {
-      const data = yield call(deleteRecord, {id});
-      if (data) {
-        message.success('Successfully deleted.');
-        const { page, per_page } = yield select(state => state.users.meta);
-        yield put({
-          type: 'getRemote',
-          payload: {
-            page,
-            per_page,
-          },
-        });
-      } else {
-        // message.error('Fail to delete.');
-      }
+    *delete({ payload: { id } }, { put, call, select }) {
+      yield call(deleteRecord, { id });
+      const { page, per_page } = yield select(state => state.users.meta);
+      yield put({
+        type: 'getRemote',
+        payload: {
+          page,
+          per_page,
+        },
+      });
     },
   },
 

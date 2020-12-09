@@ -10,7 +10,7 @@ interface UserModalProps {
 }
 
 const UserModal: FC<UserModalProps> = props => {
-  const {visible, closeHandler, record, onFinish} = props;
+  const { visible, closeHandler, record, onFinish, confirmLoading } = props;
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -34,9 +34,10 @@ const UserModal: FC<UserModalProps> = props => {
       <Modal
         forceRender
         visible={visible}
-        title={'Basic Modal'}
+        title="Basic Modal"
         onOk={onOk}
         onCancel={closeHandler}
+        confirmLoading={confirmLoading}
       >
         <Form
           form={form}
@@ -51,22 +52,13 @@ const UserModal: FC<UserModalProps> = props => {
           >
             <Input />
           </Form.Item>
-          <Form.Item
-            label="Email"
-            name="email"
-          >
+          <Form.Item label="Email" name="email">
             <Input />
           </Form.Item>
-          <Form.Item
-            label="Create Time"
-            name="create_time"
-          >
+          <Form.Item label="Create Time" name="create_time">
             <Input />
           </Form.Item>
-          <Form.Item
-            label="Status"
-            name="status"
-          >
+          <Form.Item label="Status" name="status">
             <Input />
           </Form.Item>
         </Form>
