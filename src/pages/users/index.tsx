@@ -1,27 +1,26 @@
-import React, { useState, FC } from 'react';
-import { Table,
-  Space,
-  Button,
-  Popconfirm,
-  message
-} from 'antd';
-import { connect,
-  Dispatch,
-  Loading,
-  UserState,
-} from 'umi';
+import React, { useState, useRef, FC } from 'react';
+import { Table, Space, Button, Popconfirm } from 'antd';
+import ProTable, { ProColumns, TableDropdown, ActionType } from '@ant-design/pro-table';
+import { connect, Dispatch, Loading, UserState } from 'umi';
 import UserModal from './components/UserModal';
 import { SingleUserType, FormValues } from './data';
 
 interface UserPageProps {
-  users: UserState,
-  userListLoading: boolean,
-  dispatch: Dispatch,
+  users: UserState;
+  userListLoading: boolean;
+  dispatch: Dispatch;
+}
+
+interface TableActionType {
+  reload: () => void;
+  fetchMore: () => void;
+  reset: () => void;
 }
 
 const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [record, setRecord] = useState<SingleUserType | undefined>(undefined);
+  const ref = useRef<TableActionType>();
 
   const editHandler = (record: SingleUserType) => {
     setModalVisible(true);
@@ -38,13 +37,11 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
       id = record.id;
     }
     if (id) {
-      console.log('edit');
       dispatch({
         type: 'users/edit',
         payload: { id, values },
       });
     } else {
-      console.log('add');
       dispatch({
         type: 'users/add',
         payload: { values },
@@ -64,6 +61,18 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
     setModalVisible(true);
     setRecord(undefined);
   }
+
+  const reloadHandler = () => {
+    ref.current.reload();
+  }
+
+  const requestHandler = async ({pageSize, current}) => {
+    return {
+      data: users.data,
+      success: true,
+      total: users.meta.total,
+    };
+  };
 
   const columns = [
     {
@@ -111,11 +120,17 @@ const UserListPage:FC<UserPageProps> = ({ users, userListLoading, dispatch }) =>
         type="primary"
         onClick={addHandler}
       >Add</Button>
-      <Table
+      <Button
+        onClick={reloadHandler}
+      >Reload</Button>
+      <ProTable
         rowKey="id"
         columns={columns}
         dataSource={users.data}
         loading={userListLoading}
+        request={requestHandler}
+        search={false}
+        actionRef={ref}
       />
       <UserModal
         visible={modalVisible}

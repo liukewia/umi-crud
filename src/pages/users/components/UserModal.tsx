@@ -2,12 +2,11 @@ import React, { useEffect, FC } from 'react';
 import { Modal, Form, Input } from 'antd';
 import { SingleUserType, FormValues } from '../data';
 
-
 interface UserModalProps {
-  visible: boolean,
-  closeHandler: () => void,
-  record: SingleUserType | undefined,
-  onFinish: (values: FormValues) => void,
+  visible: boolean;
+  closeHandler: () => void;
+  record: SingleUserType | undefined;
+  onFinish: (values: FormValues) => void;
 }
 
 const UserModal: FC<UserModalProps> = props => {

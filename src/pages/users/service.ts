@@ -1,33 +1,42 @@
-import request, { extend } from 'umi-request';
+import request from 'umi-request';
 import { message } from 'antd';
 import { FormValues } from './data';
 
-const errorHandler = function(error: any) {
+const errorHandler = function(error: any, situation: string) {
+  // console.log(error.response);
   if (error.response) {
     if (error.response.status >= 400) {
-      message.error(error.data.message ? error.data.message : error.data);
+      console.log(error.data);
+      let errText = error.data.message ?
+        error.data.message : error.data;
+      errText = ((new RegExp(/(.*)(\.$)/)).test(errText) ?
+        errText.match(/(.*)(\.$)/)[1] : errText)
+        .toLowerCase();
+
+      message.error(`Got Error [` + errText + `] when ` + situation.toUpperCase());
     }
   } else {
-    message.error(`Network error.`);
+    message.error(`Other network error.`);
   }
+  return false;
 };
 
-const extendRequest = extend({ errorHandler });
-
-const getRemoteList = async () => {
-  return extendRequest('https://public-api-v1.aspirantzhang.com/users/', {
+const getRemoteList = async ({page, per_page}) => {
+  console.log(page, per_page);
+  return request(`https://public-api-v1.aspirantzhang.com/users?page=${page}&per_page=${per_page}`, {
     method: 'get',
   })
     .then(response => {
       return response;
     })
     .catch(e => {
-      return false;
+      const situation = `fetching remote list.`
+      return errorHandler(e, situation);
     });
 };
 
 const addRecord = async ({values}: {values: FormValues}) => {
-  return extendRequest(`https://public-api-v1.aspirantzhang.com/users`, {
+  return request(`https://public-api-v1.aspirantzhang.com/users`, {
     method: 'post',
     data: values,
   })
@@ -35,12 +44,13 @@ const addRecord = async ({values}: {values: FormValues}) => {
       return true;
     })
     .catch(e => {
-      return false;
+      const situation = `adding record.`
+      return errorHandler(e, situation);
     });
 };
 
 const editRecord = async ({id, values}: { id: number, values: FormValues}) => {
-  return extendRequest(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
+  return request(`https://public-api-v1.aspirantzhang.com/users/${id}`, {
     method: 'put',
     data: values,
   })
@@ -48,7 +58,8 @@ const editRecord = async ({id, values}: { id: number, values: FormValues}) => {
       return true;
     })
     .catch(e => {
-      return false;
+      const situation = `editing record.`
+      return errorHandler(e, situation);
     });
 };
 
@@ -60,7 +71,8 @@ const deleteRecord = async ({id}: {id: number}) => {
       return true;
     })
     .catch(e => {
-      return false;
+      const situation = `deleting record.`
+      return errorHandler(e, situation);
     });
 };
 
@@ -71,27 +83,3 @@ export {
   editRecord,
   deleteRecord,
 }
-
-// const data = [
-//   {
-//     key: '1',
-//     name: 'John Brown',
-//     age: 32,
-//     address: 'New York No. 1 Lake Park',
-//     tags: ['nice', 'developer'],
-//   },
-//   {
-//     key: '2',
-//     name: 'Jim Green',
-//     age: 42,
-//     address: 'London No. 1 Lake Park',
-//     tags: ['loser'],
-//   },
-//   {
-//     key: '3',
-//     name: 'Joe Black',
-//     age: 32,
-//     address: 'Sidney No. 1 Lake Park',
-//     tags: ['cool', 'teacher'],
-//   },
-// ];
