@@ -23,7 +23,13 @@ const errorHandler = function(error: any, situation: string) {
   return false;
 };
 
-const getRemoteList = async ({ page, per_page }) => {
+const getRemoteList = async ({
+  page,
+  per_page,
+}: {
+  page: number;
+  per_page: number;
+}) => {
   console.log(page, per_page);
   return request(
     `https://public-api-v1.aspirantzhang.com/users?page=${page}&per_page=${per_page}`,

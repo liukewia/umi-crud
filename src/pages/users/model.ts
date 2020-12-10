@@ -64,7 +64,7 @@ const UserModel: UserModelType = {
 
     *add({ payload: { values } }, { put, call, select }) {
       yield call(addRecord, { values });
-      const { page, per_page } = yield select(state => state.users.meta);
+      const { page, per_page } = yield select((state: any) => state.users.meta);
       yield put({
         type: 'getRemote',
         payload: {
@@ -76,7 +76,7 @@ const UserModel: UserModelType = {
 
     *edit({ payload: { id, values } }, { put, call, select }) {
       yield call(editRecord, { id, values });
-      const { page, per_page } = yield select(state => state.users.meta);
+      const { page, per_page } = yield select((state: any) => state.users.meta);
       yield put({
         type: 'getRemote',
         payload: {
@@ -88,7 +88,7 @@ const UserModel: UserModelType = {
 
     *delete({ payload: { id } }, { put, call, select }) {
       yield call(deleteRecord, { id });
-      const { page, per_page } = yield select(state => state.users.meta);
+      const { page, per_page } = yield select((state: any) => state.users.meta);
       yield put({
         type: 'getRemote',
         payload: {

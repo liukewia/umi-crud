@@ -1,31 +1,42 @@
 import React, { useEffect, FC } from 'react';
-import { Modal, Form, Input } from 'antd';
+import { Modal, Form, Input, DatePicker, Switch } from 'antd';
 import { SingleUserType, FormValues } from '../data';
+import moment from 'moment';
 
 interface UserModalProps {
   visible: boolean;
   closeHandler: () => void;
   record: SingleUserType | undefined;
-  onFinish: (values: FormValues) => void;
+  onFormFinish: (values: FormValues) => void;
+  confirmLoading: boolean;
 }
 
+const layout = {
+  labelCol: { span: 4 },
+  wrapperCol: { span: 20 },
+};
+
 const UserModal: FC<UserModalProps> = props => {
-  const { visible, closeHandler, record, onFinish, confirmLoading } = props;
+  const { visible, closeHandler, record, onFormFinish, confirmLoading } = props;
   const [form] = Form.useForm();
 
   useEffect(() => {
     if (record === undefined) {
       form.resetFields();
     } else {
-      form.setFieldsValue(record);
+      form.setFieldsValue({
+        ...record,
+        create_time: moment(record.create_time),
+        status: !!record.status,
+      });
     }
   }, [visible]);
 
-  const onOk = () => {
+  const onModalOk = () => {
     form.submit();
   };
 
-  const onFinishFailed = (errorInfo: any) => {
+  const onFormFinishFailed = (errorInfo: any) => {
     console.log('Failed:', errorInfo);
   };
 
@@ -34,16 +45,18 @@ const UserModal: FC<UserModalProps> = props => {
       <Modal
         forceRender
         visible={visible}
-        title="Basic Modal"
-        onOk={onOk}
+        title={record ? `Edit User ${record.id}` : `Add A User`}
+        onOk={onModalOk}
         onCancel={closeHandler}
         confirmLoading={confirmLoading}
       >
         <Form
+          {...layout}
           form={form}
           name="basic"
-          onFinish={onFinish}
-          onFinishFailed={onFinishFailed}
+          onFinish={onFormFinish}
+          onFinishFailed={onFormFinishFailed}
+          initialValues={{ status: true }}
         >
           <Form.Item
             label="Name"
@@ -56,10 +69,10 @@ const UserModal: FC<UserModalProps> = props => {
             <Input />
           </Form.Item>
           <Form.Item label="Create Time" name="create_time">
-            <Input />
+            <DatePicker showTime />
           </Form.Item>
-          <Form.Item label="Status" name="status">
-            <Input />
+          <Form.Item label="Status" name="status" valuePropName="checked">
+            <Switch />
           </Form.Item>
         </Form>
       </Modal>

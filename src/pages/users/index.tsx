@@ -1,10 +1,6 @@
-import React, { useState, useRef, FC } from 'react';
+import React, { useState, FC } from 'react';
 import { Table, Space, Button, Popconfirm, Pagination, message } from 'antd';
-import ProTable, {
-  ProColumns,
-  TableDropdown,
-  ActionType,
-} from '@ant-design/pro-table';
+import ProTable, { ProColumns } from '@ant-design/pro-table';
 import { connect, Dispatch, Loading, UserState } from 'umi';
 import UserModal from './components/UserModal';
 import { SingleUserType, FormValues } from './data';
@@ -16,12 +12,6 @@ interface UserPageProps {
   dispatch: Dispatch;
 }
 
-interface ActionType {
-  reload: () => void;
-  fetchMore: () => void;
-  reset: () => void;
-}
-
 const UserListPage: FC<UserPageProps> = ({
   users,
   userListLoading,
@@ -30,7 +20,6 @@ const UserListPage: FC<UserPageProps> = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [record, setRecord] = useState<SingleUserType | undefined>(undefined);
   const [confirmLoading, setConfirmLoading] = React.useState(false);
-  const ref = useRef<ActionType>();
 
   const editHandler = (record: SingleUserType) => {
     setModalVisible(true);
@@ -41,7 +30,7 @@ const UserListPage: FC<UserPageProps> = ({
     setModalVisible(false);
   };
 
-  const onFinish = async (values: FormValues) => {
+  const onFormFinish = async (values: FormValues) => {
     setConfirmLoading(true);
     let id = 0;
     if (record) {
@@ -61,13 +50,7 @@ const UserListPage: FC<UserPageProps> = ({
     } else {
       // message.warning(`${id === 0 ? 'Add' : 'Edit'} failed.`);
     }
-    dispatch({
-      type: 'users/getRemote',
-      payload: {
-        page: users.meta.page,
-        per_page: users.meta.per_page,
-      },
-    });
+    reloadHandler();
   };
 
   const confirmDelete = (id: number) => {
@@ -82,22 +65,18 @@ const UserListPage: FC<UserPageProps> = ({
     setRecord(undefined);
   };
 
-  const reloadHandler = () => {
-    ref.current.reload();
-  };
-
-  const paginationHandler = async (page, pageSize) => {
+  const paginationHandler = async (page: number, pageSize?: number) => {
     console.log(page, pageSize);
     dispatch({
       type: 'users/getRemote',
       payload: {
         page,
-        per_page: pageSize,
+        per_page: pageSize ? pageSize : users.meta.per_page,
       },
     });
   };
 
-  const pageSizeHandler = async (current, size) => {
+  const pageSizeHandler = async (current: number, size: number) => {
     console.log(current, size);
     dispatch({
       type: 'users/getRemote',
@@ -108,66 +87,85 @@ const UserListPage: FC<UserPageProps> = ({
     });
   };
 
-  const columns = [
+  const reloadHandler = () => {
+    dispatch({
+      type: 'users/getRemote',
+      payload: {
+        page: users.meta.page,
+        per_page: users.meta.per_page,
+      },
+    });
+  };
+
+  const columns: ProColumns<SingleUserType>[] = [
     {
       title: 'ID',
       dataIndex: 'id',
+      valueType: 'text',
       key: 'id',
     },
     {
       title: 'Name',
       dataIndex: 'name',
+      valueType: 'text',
       key: 'name',
-      render: (text: string) => <a>{text}</a>,
+      render: (text: any) => <a>{text}</a>,
     },
     {
       title: 'Create Time',
       dataIndex: 'create_time',
+      valueType: 'dateTime',
       key: 'create_time',
     },
     {
       title: 'Action',
+      valueType: 'option',
       key: 'action',
-      render: (text: string, record: SingleUserType) => (
-        <Space size="middle">
-          <a
-            onClick={() => {
-              editHandler(record);
-            }}
-          >
-            Edit
-          </a>
-          <Popconfirm
-            title="Are you sure to delete this user?"
-            onConfirm={() => {
-              confirmDelete(record.id);
-            }}
-            okText="Yes"
-            cancelText="No"
-          >
-            <a>Delete</a>
-          </Popconfirm>
-        </Space>
-      ),
+      render: (text: any, record: SingleUserType) => [
+        <a
+          onClick={() => {
+            editHandler(record);
+          }}
+        >
+          Edit
+        </a>,
+        <Popconfirm
+          title="Are you sure to delete this user?"
+          onConfirm={() => {
+            confirmDelete(record.id);
+          }}
+          okText="Yes"
+          cancelText="No"
+        >
+          <a>Delete</a>
+        </Popconfirm>,
+      ],
     },
   ];
 
   return (
     <div className="list-table">
-      <Space size="large">
-        <Button type="primary" onClick={addHandler}>
-          Add
-        </Button>
-        <Button onClick={reloadHandler}>Reload</Button>
-      </Space>
+      <Space size="large"></Space>
       <ProTable
         rowKey="id"
+        headerTitle="User List"
+        toolBarRender={() => [
+          <Button type="primary" onClick={addHandler}>
+            Add
+          </Button>,
+          <Button onClick={reloadHandler}>Reload</Button>,
+        ]}
         columns={columns}
         dataSource={users.data}
         loading={userListLoading}
         search={false}
-        actionRef={ref}
         pagination={false}
+        options={{
+          density: true,
+          fullScreen: true,
+          reload: () => reloadHandler(),
+          setting: true,
+        }}
       />
       <Pagination
         className="list-page"
@@ -185,7 +183,7 @@ const UserListPage: FC<UserPageProps> = ({
         visible={modalVisible}
         closeHandler={closeHandler}
         record={record}
-        onFinish={onFinish}
+        onFormFinish={onFormFinish}
         confirmLoading={confirmLoading}
       ></UserModal>
     </div>
