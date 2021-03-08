@@ -1,15 +1,7 @@
-# umi project
+# 基于 umi3 与 dva 的用户管理 (crud) 应用
 
-## Getting Started
+## 截图
 
-Install dependencies,
+![user-list](./images/user-list.png)
 
-```bash
-$ yarn
-```
-
-Start the dev server,
-
-```bash
-$ yarn start
-```
+![add-user](./images/add-user.png)
